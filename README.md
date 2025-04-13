@@ -56,13 +56,12 @@ make
 
 ## ディレクトリ構成
 
-```mermaid
-graph TD
-    A[cosense2obsidian.py] -- メインスクリプト
-    B[cosense2obsidian_analyze_filename.py] -- タイトル安全性チェック用スクリプト
-    C[Makefile] -- makeコマンドで一括実行
-    D[build/] -- 入力データ配置用
-    E[vault/] -- 変換後のObsidianノート
+```
+cosense2obsidian.py                # メインスクリプト
+cosense2obsidian_analyze_filename.py  # タイトル安全性チェック用スクリプト
+Makefile                           # makeコマンドで一括実行
+build/                             # 入力データ配置用
+vault/                             # 変換後のObsidianノート
 ```
 
 ## 備考
