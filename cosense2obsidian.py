@@ -1,6 +1,7 @@
 import os
 import json
 import re
+import sys
 import unicodedata
 from pathlib import Path
 from datetime import datetime
@@ -55,8 +56,17 @@ def convert_links(line):
 
     # scrapbox由来の [[...]] → **...**（ボールド化）
     line = re.sub(r'\[\[([^\[\]]+)\]\]', r'**\1**', line)
-    # [ほげ] → [[ほげ]]
-    line = re.sub(r'\[([^\[\]]+)\]', r'[[\1]]', line)
+
+    # [タイトル] → [[id|タイトル]] or [[タイトル]]
+    def replace_link(match):
+        title = match.group(1)
+        # タイトルがファイル名として安全か判定
+        if title in title_to_id and not is_safe_filename(title):
+            return f"[[{title_to_id[title]}|{title}]]"
+        else:
+            return f"[[{title}]]"
+    line = re.sub(r'\[([^\[\]]+)\]', replace_link, line)
+
     # #ほげ → [[ほげ]]
     line = re.sub(r'(?<!\w)#([A-Za-z0-9_\u3040-\u30FF\u4E00-\u9FFF]+)', r'[[\1]]', line)
     return line
@@ -115,6 +125,8 @@ def write_markdown_file(page):
 def main():
     ensure_vault_dir()
     data = load_input_json()
+    global title_to_id
+    title_to_id = {page["title"]: page["id"] for page in data["pages"]}
     title_count = 0
     id_count = 0
     for page in data["pages"]:
