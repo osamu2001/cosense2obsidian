@@ -1,5 +1,6 @@
 import os
 import json
+import re
 from pathlib import Path
 from datetime import datetime
 
@@ -27,10 +28,17 @@ def to_yaml_frontmatter(page):
     ]
     return "\n".join(lines)
 
+def convert_links(line):
+    # [ほげ] → [[ほげ]]
+    line = re.sub(r'\[([^\[\]]+)\]', r'[[\1]]', line)
+    return line
+
 def write_markdown_file(page):
     md_path = os.path.join(VAULT_DIR, f'{page["id"]}.md')
     frontmatter = to_yaml_frontmatter(page)
-    body = "\n".join(page["lines"])
+    # 各行にリンク変換を適用
+    converted_lines = [convert_links(line) for line in page["lines"]]
+    body = "\n".join(converted_lines)
     content = frontmatter + body + "\n"
     with open(md_path, "w", encoding="utf-8") as f:
         f.write(content)
