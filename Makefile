@@ -14,6 +14,9 @@ build/input.json:
 		exit 1; \
 	fi; \
 	curl -s -H "Cookie: connect.sid=$$SCRAPBOX_SESSION_ID" "https://scrapbox.io/api/page-data/export/$$SCRAPBOX_PROJECT.json" -o build/input.json
+analyze:
+	python3 cosense2obsidian_analyze_filename.py
+
 
 clean:
 	rm -rf build vault
