@@ -74,7 +74,7 @@ def write_markdown_file(page):
             ""
         ]
     md_path = os.path.join(VAULT_DIR, filename)
-    body = "\n".join(page["lines"])
+    body = "\n".join(convert_links(line) for line in page["lines"])
     content = "\n".join(lines) + body + "\n"
     with open(md_path, "w", encoding="utf-8") as f:
         f.write(content)
