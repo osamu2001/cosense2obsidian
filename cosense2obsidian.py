@@ -72,7 +72,8 @@ def convert_links(line):
     return line
 
 def is_safe_filename(title):
-    forbidden = r'\\/:*?"<>|#\[\]'
+    # 「/」は安全判定から除外し、write_markdown_fileで個別処理
+    forbidden = r'\\:*?"<>|#\[\]'
     if any(c in forbidden for c in title):
         return False
     if title.strip(' .') != title or not title:
@@ -82,8 +83,43 @@ def is_safe_filename(title):
 def write_markdown_file(page):
     title = page["title"]
     page_id = page["id"]
-    if is_safe_filename(title):
+    # 「/」を含む場合は階層化
+    if "/" in title and is_safe_filename(title.replace("/", "")):
+        # 各パートが安全かチェック
+        parts = title.split("/")
+        if all(is_safe_filename(part) for part in parts):
+            # ディレクトリ階層を作成
+            dir_path = os.path.join(VAULT_DIR, *parts[:-1]) if len(parts) > 1 else VAULT_DIR
+            os.makedirs(dir_path, exist_ok=True)
+            filename = os.path.join(*parts) + ".md"
+            md_path = os.path.join(VAULT_DIR, filename)
+            # frontmatter（aliasなし）
+            lines = [
+                "---",
+                f"created: {page['created']}",
+                f"updated: {page['updated']}",
+                f"id: {page['id']}",
+                f"views: {page.get('views', 0)}",
+                "---",
+                ""
+            ]
+        else:
+            # パートに不安全な文字が含まれる場合はid.md
+            filename = f"{page_id}.md"
+            md_path = os.path.join(VAULT_DIR, filename)
+            lines = [
+                "---",
+                f'aliases: ["{title}"]',
+                f"created: {page['created']}",
+                f"updated: {page['updated']}",
+                f"id: {page['id']}",
+                f"views: {page.get('views', 0)}",
+                "---",
+                ""
+            ]
+    elif is_safe_filename(title):
         filename = f"{title}.md"
+        md_path = os.path.join(VAULT_DIR, filename)
         # frontmatter（aliasなし）
         lines = [
             "---",
@@ -96,6 +132,7 @@ def write_markdown_file(page):
         ]
     else:
         filename = f"{page_id}.md"
+        md_path = os.path.join(VAULT_DIR, filename)
         # frontmatter（aliasあり）
         lines = [
             "---",
@@ -107,7 +144,6 @@ def write_markdown_file(page):
             "---",
             ""
         ]
-    md_path = os.path.join(VAULT_DIR, filename)
     lines_to_use = page["lines"]
     if lines_to_use and lines_to_use[0] == title:
         lines_to_use = lines_to_use[1:]
