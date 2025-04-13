@@ -31,6 +31,28 @@ def to_yaml_frontmatter(page):
     return "\n".join(lines)
 
 def convert_links(line):
+    # Scrapbox装飾記法 [* 太字] [/ 斜体] [- 打ち消し] [/* 太字斜体] [-*/ 打ち消し斜体太字] などをMarkdownに変換
+    def replace_decor(match):
+        deco = match.group(1)
+        text = match.group(2)
+        md = text
+        # 装飾の優先順: -（打ち消し）, *（太字）, /（斜体）
+        if '-' in deco:
+            md = f"~~{md}~~"
+        if '*' in deco and '/' in deco:
+            md = f"***{text}***"
+        elif '*' in deco:
+            md = f"**{text}**"
+        elif '/' in deco:
+            md = f"*{text}*"
+        # 打ち消しと複合
+        if '-' in deco and ('*' in deco or '/' in deco):
+            md = f"~~{md}~~"
+        return md
+
+    # [* 太字] など
+    line = re.sub(r'\[([*/\-]+)\s+([^\[\]]+?)\]', replace_decor, line)
+
     # scrapbox由来の [[...]] → **...**（ボールド化）
     line = re.sub(r'\[\[([^\[\]]+)\]\]', r'**\1**', line)
     # [ほげ] → [[ほげ]]
