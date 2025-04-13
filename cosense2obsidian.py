@@ -20,7 +20,7 @@ def to_yaml_frontmatter(page):
     # 必要なメタ情報をYAML形式で返す
     lines = [
         "---",
-        f'alias: ["{page["title"]}"]',
+        f'aliases: ["{page["title"]}"]',
         f'created: {page["created"]}',
         f'updated: {page["updated"]}',
         f'id: {page["id"]}',
@@ -89,7 +89,7 @@ def write_markdown_file(page):
         # frontmatter（aliasあり）
         lines = [
             "---",
-            f'alias: ["{title}"]',
+            f'aliases: ["{title}"]',
             f"created: {page['created']}",
             f"updated: {page['updated']}",
             f"id: {page['id']}",
