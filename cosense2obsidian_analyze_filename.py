@@ -39,9 +39,6 @@ def analyze():
     print("【id.mdで保存されたタイトルの不安全原因ランキング】")
     for k, v in sorted(cause_counter.items(), key=lambda x: -x[1]):
         print(f"{k}: {v}件")
-    print("\n【代表的な不安全タイトル例】")
-    for t in example_titles:
-        print(repr(t))
 
 if __name__ == "__main__":
     analyze()
