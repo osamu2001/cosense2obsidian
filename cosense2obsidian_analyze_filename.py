@@ -12,7 +12,7 @@ def is_safe_filename(title):
 def analyze():
     with open("build/input.json", encoding="utf-8") as f:
         data = json.load(f)
-    forbidden = r'\\/:*?"<>|#\[\]'
+    forbidden = r'\\:*?"<>|#\[\]'
     forbidden_set = set(forbidden)
     cause_counter = {}
     example_titles = []
