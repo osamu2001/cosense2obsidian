@@ -81,6 +81,10 @@ def is_safe_filename(title):
     return True
 
 def write_markdown_file(page):
+    # 「タイトルと同じ1行だけのノート」は出力しない
+    if len(page["lines"]) == 1 and page["lines"][0] == page["title"]:
+        return None
+
     title = page["title"]
     page_id = page["id"]
     # 「/」を含む場合は階層化
@@ -167,6 +171,8 @@ def main():
     id_count = 0
     for page in data["pages"]:
         filename = write_markdown_file(page)
+        if filename is None:
+            continue
         if filename.endswith(f"{page['id']}.md"):
             id_count += 1
         else:
