@@ -31,6 +31,8 @@ def to_yaml_frontmatter(page):
     return "\n".join(lines)
 
 def convert_links(line):
+    # scrapbox由来の [[...]] → **...**（ボールド化）
+    line = re.sub(r'\[\[([^\[\]]+)\]\]', r'**\1**', line)
     # [ほげ] → [[ほげ]]
     line = re.sub(r'\[([^\[\]]+)\]', r'[[\1]]', line)
     # #ほげ → [[ほげ]]
@@ -74,7 +76,10 @@ def write_markdown_file(page):
             ""
         ]
     md_path = os.path.join(VAULT_DIR, filename)
-    body = "\n".join(convert_links(line) for line in page["lines"])
+    lines_to_use = page["lines"]
+    if lines_to_use and lines_to_use[0] == title:
+        lines_to_use = lines_to_use[1:]
+    body = "\n".join(convert_links(line) for line in lines_to_use)
     content = "\n".join(lines) + body + "\n"
     with open(md_path, "w", encoding="utf-8") as f:
         f.write(content)
