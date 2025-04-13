@@ -2,8 +2,8 @@
 
 all: vault
 
-vault: build/input.json cosense2obsidian.py
-	python3 cosense2obsidian.py
+vault: build/input.json src/cosense2obsidian.py
+	python3 src/cosense2obsidian.py
 
 build/input.json:
 	@mkdir -p build
@@ -16,7 +16,7 @@ build/input.json:
 	curl -s -H "Cookie: connect.sid=$$SCRAPBOX_SESSION_ID" "https://scrapbox.io/api/page-data/export/$$SCRAPBOX_PROJECT.json" -o build/input.json
 
 analyze: build/input.json
-	python3 cosense2obsidian_analyze_filename.py
+	python3 src/cosense2obsidian_analyze_filename.py
 
 clean:
 	rm -rf build vault/*
