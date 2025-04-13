@@ -31,6 +31,9 @@ def to_yaml_frontmatter(page):
 def convert_links(line):
     # [ほげ] → [[ほげ]]
     line = re.sub(r'\[([^\[\]]+)\]', r'[[\1]]', line)
+    # #ほげ → [[ほげ]]（単語境界で#の後に英数字・日本語・_が続くもの）
+    # 既に[[ほげ]]になっているものは変換しない
+    line = re.sub(r'(?<!\w)#([A-Za-z0-9_\u3040-\u30FF\u4E00-\u9FFF]+)', r'[[\1]]', line)
     return line
 
 def write_markdown_file(page):
