@@ -72,12 +72,25 @@ def convert_links(line):
     return line
 
 def is_safe_filename(title):
-    # 「/」は安全判定から除外し、write_markdown_fileで個別処理
+    # システム予約名チェック
+    reserved_names = {
+        'null', 'con', 'prn', 'aux', 'nul',
+        'com1', 'com2', 'com3', 'com4', 'com5', 'com6', 'com7', 'com8', 'com9',
+        'lpt1', 'lpt2', 'lpt3', 'lpt4', 'lpt5', 'lpt6', 'lpt7', 'lpt8', 'lpt9'
+    }
+    # パス区切り文字(/)を含む場合や、ベース名が予約名の場合は安全でない
+    if '/' in title or any(part.lower() in reserved_names for part in title.split('/')):
+        return False
+        
+    # 禁止文字チェック
     forbidden = r'\\:*?"<>|#\[\]'
     if any(c in forbidden for c in title):
         return False
+        
+    # 先頭/末尾の空白やピリオドチェック
     if title.strip(' .') != title or not title:
         return False
+        
     return True
 
 def write_markdown_file(page):
@@ -87,45 +100,12 @@ def write_markdown_file(page):
 
     title = page["title"]
     page_id = page["id"]
-    # 「/」を含む場合は階層化
-    if "/" in title and is_safe_filename(title.replace("/", "")):
-        # 各パートが安全かチェック
-        parts = title.split("/")
-        if all(is_safe_filename(part) for part in parts):
-            # ディレクトリ階層を作成
-            dir_path = os.path.join(VAULT_DIR, *parts[:-1]) if len(parts) > 1 else VAULT_DIR
-            os.makedirs(dir_path, exist_ok=True)
-            filename = os.path.join(*parts) + ".md"
-            md_path = os.path.join(VAULT_DIR, filename)
-            # frontmatter
-            lines = [
-                "---",
-                f'title: "{page["title"]}"',
-                f"created: {page['created']}",
-                f"updated: {page['updated']}",
-                f"id: {page['id']}",
-                f"views: {page.get('views', 0)}",
-                "---",
-                ""
-            ]
-        else:
-            # パートに不安全な文字が含まれる場合はid.md
-            filename = f"{page_id}.md"
-            md_path = os.path.join(VAULT_DIR, filename)
-            lines = [
-                "---",
-                f'title: "{title}"',
-                f"created: {page['created']}",
-                f"updated: {page['updated']}",
-                f"id: {page['id']}",
-                f"views: {page.get('views', 0)}",
-                "---",
-                ""
-            ]
-    elif is_safe_filename(title):
+    
+    # タイトルに安全な文字のみ含まれる場合
+    if is_safe_filename(title):
         filename = f"{title}.md"
         md_path = os.path.join(VAULT_DIR, filename)
-        # frontmatter（aliasなし）
+        # frontmatter
         lines = [
             "---",
             f'title: "{page["title"]}"',
@@ -137,6 +117,7 @@ def write_markdown_file(page):
             ""
         ]
     else:
+        # 安全でない文字が含まれる場合、IDをファイル名に使用
         filename = f"{page_id}.md"
         md_path = os.path.join(VAULT_DIR, filename)
         # frontmatter
@@ -150,6 +131,7 @@ def write_markdown_file(page):
             "---",
             ""
         ]
+
     lines_to_use = page["lines"]
     if lines_to_use and lines_to_use[0] == title:
         lines_to_use = lines_to_use[1:]
@@ -168,10 +150,14 @@ def main():
     ensure_vault_dir()
     data = load_input_json()
     global title_to_id
+    ensure_vault_dir()
+    print(f"VAULT_DIR: {VAULT_DIR}")  # デバッグ用
+    
     title_to_id = {page["title"]: page["id"] for page in data["pages"]}
     title_count = 0
     id_count = 0
-    for page in data["pages"]:
+    for i, page in enumerate(data["pages"]):
+        print(f"Processing page {i+1}/{len(data['pages'])}: {page.get('title')}")  # デバッグ用
         filename = write_markdown_file(page)
         if filename is None:
             continue
