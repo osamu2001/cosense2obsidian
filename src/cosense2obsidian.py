@@ -21,7 +21,7 @@ def to_yaml_frontmatter(page):
     # 必要なメタ情報をYAML形式で返す
     lines = [
         "---",
-        f'aliases: ["{page["title"]}"]',
+        f'title: "{page["title"]}"',
         f'created: {page["created"]}',
         f'updated: {page["updated"]}',
         f'id: {page["id"]}',
@@ -97,9 +97,10 @@ def write_markdown_file(page):
             os.makedirs(dir_path, exist_ok=True)
             filename = os.path.join(*parts) + ".md"
             md_path = os.path.join(VAULT_DIR, filename)
-            # frontmatter（aliasなし）
+            # frontmatter
             lines = [
                 "---",
+                f'title: "{page["title"]}"',
                 f"created: {page['created']}",
                 f"updated: {page['updated']}",
                 f"id: {page['id']}",
@@ -113,7 +114,7 @@ def write_markdown_file(page):
             md_path = os.path.join(VAULT_DIR, filename)
             lines = [
                 "---",
-                f'aliases: ["{title}"]',
+                f'title: "{title}"',
                 f"created: {page['created']}",
                 f"updated: {page['updated']}",
                 f"id: {page['id']}",
@@ -127,6 +128,7 @@ def write_markdown_file(page):
         # frontmatter（aliasなし）
         lines = [
             "---",
+            f'title: "{page["title"]}"',
             f"created: {page['created']}",
             f"updated: {page['updated']}",
             f"id: {page['id']}",
@@ -137,10 +139,10 @@ def write_markdown_file(page):
     else:
         filename = f"{page_id}.md"
         md_path = os.path.join(VAULT_DIR, filename)
-        # frontmatter（aliasあり）
+        # frontmatter
         lines = [
             "---",
-            f'aliases: ["{title}"]',
+            f'title: "{title}"',
             f"created: {page['created']}",
             f"updated: {page['updated']}",
             f"id: {page['id']}",
